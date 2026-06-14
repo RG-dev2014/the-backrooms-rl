@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+
+# Ignore other workspace projects
+GameLandingPage/
+ProjectZero/
+antfarm_sim/
+antfarm_sim.zip
+block-shooter/
+convert_icon.py
+doom-fps/
+generate_map.mjs
+horror-game/
+medieval_fighter/
+parkour-game/
+pillow-fight-game/
+primal-spark/
+tank-td/
+testGen.js
+the backrooms/

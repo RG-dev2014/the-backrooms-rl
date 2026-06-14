@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Backrooms</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+      
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #000;
+        font-family: monospace;
+      }
+      #ui {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        text-align: center;
+        pointer-events: none;
+        z-index: 10;
+        background: rgba(0,0,0,0.5);
+        padding: 20px;
+        border-radius: 5px;
+      }
+      #crosshair {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 4px;
+        height: 4px;
+        background-color: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        z-index: 5;
+        pointer-events: none;
+        display: none;
+      }
+      
+      /* Camcorder HUD Styles */
+      
+      #hud {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none;
+        z-index: 4;
+        display: none; /* Hidden until game starts */
+        font-family: 'VT323', monospace;
+        color: white;
+        text-shadow: 2px 2px 0px rgba(0,0,0,0.8), -2px 0px 0px rgba(255,0,0,0.5), 2px 0px 0px rgba(0,0,255,0.5); /* Chromatic aberration text */
+        box-sizing: border-box;
+        border: 25px solid #050505; /* Thick CRT bezel */
+        border-radius: 60px; /* Curved glass corners */
+        box-shadow: inset 0 0 150px rgba(0,0,0,1), inset 0 0 50px rgba(0,0,0,0.8); /* Heavy vignette shadow on edges */
+      }
+
+      .vhs-tracking-line {
+        position: absolute;
+        left: 0; right: 0;
+        height: 6vh;
+        pointer-events: none;
+        z-index: 2;
+        background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0) 100%);
+        animation: vhsRoll 7s linear infinite;
+      }
+      
+      @keyframes vhsRoll {
+        0% { top: -20vh; }
+        100% { top: 120vh; }
+      }
+      
+      #hud-frame {
+        position: absolute;
+        top: 40px; left: 40px; right: 40px; bottom: 40px;
+        border: 2px solid white;
+      }
+      
+      #hud-db {
+        color: rgba(200, 255, 200, 0.8);
+      }
+      #chat-container {
+        position: absolute;
+        bottom: 180px;
+        left: 60px;
+        width: 350px;
+        z-index: 5;
+        font-family: 'Courier New', Courier, monospace;
+        pointer-events: none;
+      }
+      #chat-messages {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 10px 0;
+        max-height: 250px;
+        overflow-y: hidden;
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 1px 1px 2px rgba(0,0,0,1);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+      #chat-messages li {
+        margin-bottom: 5px;
+        word-wrap: break-word;
+      }
+      #chat-input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        color: white;
+        padding: 8px;
+        box-sizing: border-box;
+        font-family: inherit;
+        pointer-events: auto;
+        display: none;
+        outline: none;
+      }
+      
+      .hud-rec {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 48px;
+        font-weight: bold;
+        letter-spacing: 4px;
+        animation: blink 1s step-end infinite;
+      }
+      
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      
+      .hud-battery {
+        position: absolute;
+        top: 30px;
+        left: 20px;
+        width: 60px;
+        height: 25px;
+        border: 3px solid white;
+        border-radius: 3px;
+        display: flex;
+        padding: 2px;
+        gap: 2px;
+      }
+      
+      .hud-battery::after {
+        content: '';
+        position: absolute;
+        right: -8px;
+        top: 6px;
+        width: 5px;
+        height: 13px;
+        background: white;
+        border-radius: 0 3px 3px 0;
+      }
+      
+      .hud-battery-bar {
+        flex: 1;
+        background: white;
+      }
+      
+      .hud-stats {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="ui">Click to Enter the Backrooms</div>
+    <div id="crosshair">+</div>
+    
+    <div id="chat-container">
+      <ul id="chat-messages"></ul>
+      <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+    </div>
+
+    <!-- VHS Effects -->
+    <div id="hud">
+      <div class="vhs-tracking-line"></div>
+      <div id="hud-frame">
+        <div class="hud-battery">
+          <div class="hud-battery-bar"></div>
+          <div class="hud-battery-bar"></div>
+          <div class="hud-battery-bar" style="background: transparent;"></div>
+        </div>
+        <div class="hud-rec">REC</div>
+        <div class="hud-stats">
+          AF<br>
+          F2.8<br>
+          <span id="hud-db">0dB</span>
+        </div>
+        <div id="hud-fps" style="position: absolute; bottom: 20px; right: 20px; font-size: 28px; letter-spacing: 2px;">60 FPS</div>
+      </div>
+    </div>
+    <div id="error-log" style="color: red; position: absolute; top: 10px; left: 10px; z-index: 9999; font-family: monospace; white-space: pre-wrap; background: rgba(0,0,0,0.8); padding: 10px; display: none;"></div>
+    <script>
+      window.addEventListener('error', function(event) {
+        const errLog = document.getElementById('error-log');
+        errLog.style.display = 'block';
+        errLog.innerText += event.message + '\n' + event.filename + ':' + event.lineno + '\n\n';
+      });
+      window.addEventListener('unhandledrejection', function(event) {
+        const errLog = document.getElementById('error-log');
+        errLog.style.display = 'block';
+        errLog.innerText += event.reason + '\n\n';
+      });
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
